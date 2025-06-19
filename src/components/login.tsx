@@ -3,9 +3,10 @@ import './auth.css';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {Auth} from '@/Services/index';
-
-const Login = () => {
+import { Auth } from '@/Services/index';
+import {injectModels} from '@/Redux/injectModel'
+const Login = (props:any) => {
+  console.log(props,'props');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,7 +15,7 @@ const Login = () => {
   const router = useRouter();
 
   const validateEmail = (email: string) => {
-    const regex =  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return regex.test(email);
   };
 
@@ -45,19 +46,29 @@ const Login = () => {
     }
 
     try {
-      let object={
-        email:email,
-        password:password
+      let object = {
+        email: email,
+        password: password,
+        role:'user'
       }
-      const response = await Auth.loginUser(object);
-      setSuccess('Login successful!');
-      console.log('login success:',response);
-      router.push('/home');
+      const response = await props.auth.login(object);
+      if (response.success) {
+        setSuccess('Login successful!');
+        console.log('login success:', response);
+        router.push('/home');
+      } else {
+        console.log('Login failed:', error);
+        setError("Getting error in login");
+      }
     } catch (error: any) {
       console.error('Login failed:', error);
       setError(error?.response?.data?.msg || 'Login failed.');
     }
   };
+
+  const handleForgot = () => {
+    router.push('/forgotPassword')
+  }
 
   return (
     <div className="container">
@@ -82,10 +93,11 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
         <p>Don't have an account? <Link href="/register">Register</Link></p>
-        <button type="submit" className="button">Login</button>
+        <button type="submit" className="button">Login</button> <br></br><br></br>
+        <span className='button' onClick={handleForgot}>Forgot Password</span>
       </form>
     </div>
   );
 };
 
-export default Login;
+export default injectModels(['auth'])(Login);

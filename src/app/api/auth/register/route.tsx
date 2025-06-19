@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import User from '@/Models/userModel';
 import bcrypt from 'bcryptjs';
-import { signToken } from "@/lib/auth";
+import mailer from "@/lib/nodeMailer";
 import connection from "@/lib/db";
 
 export async function POST(req: Request) {
@@ -31,10 +31,30 @@ export async function POST(req: Request) {
   }
   const hashPassword = await bcrypt.hash(password, 10);
 
+  //  const verificationToken = crypto.randomBytes(32).toString('hex');
   try {
     const user = new User({ email, name, password: hashPassword });
     const result = await user.save();
     console.log(result, 'result');
+return NextResponse.json({ msg: 'user created', success: true,result, status: 201 })
+    // Verification link
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const verificationUrl = `${baseUrl}/api/auth/verify?userId=${user._id}`;
+    console.log(verificationUrl, 'verificationUrl')
+   
+    // Construct email content
+    const htmlContent = `
+  <h2>Welcome to Digital Platform, ${name}!</h2>
+  <p>Click the button below to verify your email:</p>
+  <a href="${verificationUrl}" style="padding: 10px 20px; background-color: #0070f3; color: white; text-decoration: none; border-radius: 5px;">Verify Email</a>
+  <p>If the button doesn't work, open this link: <a href="${verificationUrl}">${verificationUrl}</a></p>
+`;
+
+    await mailer.sendMail(
+      email,
+      "Verify your email",
+      htmlContent
+    );
   } catch (error) {
     return NextResponse.json({ msg: error, success: false, status: 500 })
   }

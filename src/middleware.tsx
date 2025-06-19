@@ -5,7 +5,7 @@ import { verifyToken } from "./lib/auth";
 
 export function middleware(request: NextRequest) {
 
-    const token = request.cookies.get("token")?.value;
+    const token = request.cookies.get("access_token")?.value;
     const getAuth = request.cookies.get("isAuthenticated")?.value;
 
     const verified = token && verifyToken(token);

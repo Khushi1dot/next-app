@@ -7,9 +7,9 @@ export function signToken(payload: object) {
   return jwt.sign(payload, SECRET, { expiresIn: "1h" });
 }
 
-export function verifyToken(token: string) {
+export function verifyToken(access_token: string) {
   try {
-    return jwt.verify(token, SECRET);
+    return jwt.verify(access_token, SECRET);
   } catch {
     return null;
   }

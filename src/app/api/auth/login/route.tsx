@@ -41,8 +41,8 @@ export async function POST(req: Request) {
         }
         const token = signToken(object);
         // const token = jwt.sign({ name, email }, process.env.SECRET_KEY);
-        const response = NextResponse.json({ msg: 'user login successfully', success: true, token, status: 201 });
-        response.cookies.set('token', token,
+        const response = NextResponse.json({ msg: 'user login successfully', success: true, token,object, status: 201 });
+        response.cookies.set('access_token', token,
             {
                 // httpOnly: true,
                 path: "/",
